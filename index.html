@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Story zu 3D-Animation</title>
+<title>Story zu 3D-Film (kostenlos)</title>
 <style>
 :root{color-scheme:dark;--bg:#171a33;--card:#21264a;--line:#38407a;--tx:#ecebf7;--mut:#a2a6cf;--ac:#8b7cff;--warn:#ffb547}
 *{box-sizing:border-box}
@@ -12,75 +12,73 @@ main{max-width:680px;margin:0 auto}
 h1{font-size:1.8rem;line-height:1.15;margin:.5em 0 .3em;letter-spacing:-.015em}
 .sub{color:var(--mut);margin:0 0 1.4em;max-width:60ch}
 label{display:block;font-weight:600;margin:1.1em 0 .35em;font-size:.95rem}
-textarea,input[type=password],select{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}
+textarea,input[type=password],input[type=text],select{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}
 textarea{min-height:150px;resize:vertical}
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.row label{margin-top:1.1em}
 @media(max-width:520px){.row{grid-template-columns:1fr}}
 .chk{display:flex;align-items:center;gap:8px;font-weight:400;color:var(--mut);margin:.6em 0 0}
 .chk input{width:auto}
+details{margin-top:1em;color:var(--mut)}
 button,.btn{display:inline-block;background:var(--ac);color:#11132b;border:0;border-radius:10px;padding:14px 20px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
 button{width:100%;margin-top:1.4em}
 button:disabled{opacity:.5;cursor:wait}
 .hint{color:var(--mut);font-size:.88rem;margin:.7em 0 0}
 #prog{margin-top:1.6em}
 .track{height:6px;background:var(--card);border-radius:3px;overflow:hidden}
-#bar{height:100%;width:0;background:var(--ac);transition:width .6s}
+#bar{height:100%;width:0;background:var(--ac);transition:width .5s}
 #status{margin:.6em 0 0;min-height:1.5em}
 #status.err{color:var(--warn)}
-#out{margin-top:1.6em}
-video{width:100%;border-radius:12px;background:#000;display:block}
+#frame,#player{width:100%;border:0;border-radius:12px;background:#000;display:block;margin-top:1em}
 #out .btn{margin-top:1em;width:100%}
-#parts{margin-top:1.2em;color:var(--mut);font-size:.92rem}
-#parts a{color:var(--ac);margin-right:12px}
 </style>
 </head>
 <body>
 <main>
 <h1>Aus einer Geschichte wird ein 3D-Film</h1>
-<p class="sub">Beschreibe, was passieren soll. Gemini Omni baut daraus eine stumme 3D-Animation in mehreren Teilen, fügt sie zusammen und du lädst sie herunter.</p>
+<p class="sub">Gemini schreibt aus deiner Geschichte ein 3D-Skript, dein Browser spielt es ab und nimmt es als stummes Video auf. Das läuft mit dem kostenlosen Google-Key.</p>
 
 <label for="story">Deine Geschichte</label>
 <textarea id="story" placeholder="Zum Beispiel: Ich laufe abends nach Hause. Ein Taxi hält neben mir. Ich gebe dem Taxifahrer einen PC. Er ist freundlich, steigt aus und …"></textarea>
 
 <div class="row">
   <div><label for="len">Länge</label>
-    <select id="len"><option value="30">ca. 30 Sekunden</option><option value="60" selected>ca. 60 Sekunden</option><option value="90">ca. 90 Sekunden</option></select></div>
+    <select id="len"><option value="30">30 Sekunden</option><option value="60" selected>60 Sekunden</option><option value="90">90 Sekunden</option></select></div>
   <div><label for="fmt">Format</label>
-    <select id="fmt"><option value="16:9">Querformat 16:9</option><option value="9:16">Hochformat 9:16</option></select></div>
-  <div><label for="sty">3D-Stil</label>
-    <select id="sty"><option value="pixar">Pixar-artig</option><option value="real">Realistisches 3D</option><option value="poly">Low-Poly</option></select></div>
+    <select id="fmt"><option value="16:9">Querformat</option><option value="9:16">Hochformat</option></select></div>
+  <div><label for="sty">Stil</label>
+    <select id="sty"><option value="pixar">Rund und bunt</option><option value="real">Natürlich</option><option value="poly">Low-Poly</option></select></div>
 </div>
 
 <label for="key">Google API-Key</label>
 <input id="key" type="password" autocomplete="off" placeholder="AIza…">
 <label class="chk"><input type="checkbox" id="rem"> Key auf diesem Gerät merken</label>
+<details><summary>Erweitert</summary>
+  <label for="model">Textmodell</label>
+  <input id="model" type="text" value="gemini-3.8-flash">
+</details>
 
-<button id="go">Animation erstellen</button>
-<p class="hint">Ein Teil dauert ca. 10 Sekunden Film und braucht oft 1–3 Minuten Rechenzeit. 60 Sekunden sind also 6 Anfragen und verbrauchen API-Guthaben. Tab und Bildschirm währenddessen geöffnet lassen.</p>
+<button id="go">Film erstellen</button>
+<p class="hint">Die Aufnahme läuft in Echtzeit: 60 Sekunden Film brauchen 60 Sekunden. Tab und Bildschirm so lange geöffnet lassen. Die Figuren bestehen aus einfachen 3D-Formen.</p>
 
 <div id="prog" hidden>
   <div class="track"><div id="bar"></div></div>
   <p id="status"></p>
 </div>
-
+<iframe id="frame" sandbox="allow-scripts" hidden title="Vorschau"></iframe>
 <div id="out" hidden>
   <video id="player" controls playsinline></video>
   <a id="dl" class="btn">Video herunterladen</a>
-  <div id="parts"></div>
 </div>
 </main>
 
 <script>
 const $ = id => document.getElementById(id);
 const API = 'https://generativelanguage.googleapis.com/v1beta';
-const MODEL = 'gemini-omni-1.1-flash';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const STYLES = {
-  pixar: 'Stylized 3D animated film, Pixar-like CGI, soft cinematic lighting, expressive characters',
-  real: 'Photorealistic 3D CGI render, cinematic lighting, high detail',
-  poly: 'Stylized low-poly 3D animation, clean geometric shapes, bright colors'
+  pixar: 'Rounded, friendly, saturated colors, big expressive heads, soft shading.',
+  real: 'Natural proportions, muted realistic colors, believable lighting.',
+  poly: 'Low-poly look: use flatShading:true on materials, bright flat colors.'
 };
 
 try { const k = localStorage.getItem('gemini_key'); if (k) { $('key').value = k; $('rem').checked = true; } } catch (e) {}
@@ -92,148 +90,137 @@ function log(msg, pct, err) {
   if (pct != null) $('bar').style.width = pct + '%';
 }
 
-function common(style) {
-  return `${style}. This is a 3D animation, not live-action footage. Completely silent: no audio, no dialogue, no music, no sound effects.`;
-}
-function newPrompt(story, i, n, style) {
-  const cont = i > 1 ? ' This continues an earlier part of the same animation: same characters, same look, same setting.' : '';
-  return `${common(style)}${cont} The story is told in ${n} consecutive parts of about 10 seconds each. This is part ${i} of ${n}: show only the matching portion of the story${i === 1 ? ', starting at its very beginning, and do not rush ahead' : ''}${i === n ? ', and bring the story to a natural ending' : ', and do not end the story yet'}. Story (may be in German): "${story}"`;
-}
-function extPrompt(story, i, n, style) {
-  return `Extend this video by about 10 seconds. ${common(style)} Continue directly where the last shot ended, same characters, same look, same setting. This is part ${i} of ${n} of the story: show only the matching portion${i === n ? ', and bring the story to a natural ending' : ', and do not end the story yet'}. Story (may be in German): "${story}"`;
-}
+const SYS = style => `You are an expert 3D animator who writes Three.js code (r128, global THREE, no imports). Output ONLY JavaScript code, no markdown fences, no explanations.
+Define exactly one entry point: function build(THREE, scene, camera, renderer, DURATION) { ...; return function update(t){ ... } }
+- build creates everything: scene.background, lights (ambient + directional with shadows), ground, environment that fits the story, props, characters. Set renderer.shadowMap.enabled = true and castShadow/receiveShadow where useful. Never resize the renderer or change camera.aspect.
+- update(t) is called every frame with t = seconds from 0 to DURATION. Every animated value must be computed purely from t (no accumulated state, no delta time), so any t works. Move the camera inside update (camera.position + camera.lookAt) with several shots and cuts (6 to 10 shots), so the whole story plays out across the full DURATION at a good pace. Never leave long idle stretches.
+- Use only primitive geometries (BoxGeometry, SphereGeometry, CylinderGeometry, ConeGeometry, TorusGeometry, PlaneGeometry, CircleGeometry, RingGeometry) with MeshStandardMaterial or MeshLambertMaterial. No textures, no images, no fonts, no network, no loaders, no OrbitControls, no CapsuleGeometry, no text on screen, no sound.
+- Build characters as THREE.Group with head, body, pivoting arms and legs, and simple faces (eyes, mouth). Animate walk cycles, gestures, nodding, door opening, vehicles with rotating wheels, whatever the story needs. Show every story event visibly (handing over objects, getting in or out of a car, greetings).
+- Keep it under 1500 meshes. Use small helper functions to keep the code short. Style: ${STYLES[style]}
+- The code must run without errors on the first try.`;
 
-async function gen(key, input, prev, aspect) {
-  const body = { model: MODEL, input, response_format: { type: 'video', aspect_ratio: aspect, delivery: 'uri' } };
-  if (prev) body.previous_interaction_id = prev;
-  const r = await fetch(API + '/interactions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify(body)
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j.error && j.error.message) || 'HTTP ' + r.status);
-  return j;
-}
-
-function findVideo(j) {
-  if (j.output_video && (j.output_video.data || j.output_video.uri)) return j.output_video;
-  for (const s of (j.steps || [])) for (const c of (s.content || []))
-    if (c.type === 'video' && (c.data || c.uri)) return c;
-  return null;
-}
-
-async function toBlob(v, key) {
-  if (v.data) {
-    const bin = atob(v.data), arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return new Blob([arr], { type: v.mime_type || 'video/mp4' });
-  }
-  const id = (v.uri.match(/files\/([^/:?]+)/) || [])[1];
-  if (!id) throw new Error('Unbekannte Video-Adresse in der Antwort.');
-  const h = { 'x-goog-api-key': key };
-  for (let t = 0; t < 120; t++) {
-    const f = await (await fetch(`${API}/files/${id}`, { headers: h })).json();
-    if (f.state === 'ACTIVE') break;
-    if (f.state === 'FAILED') throw new Error('Google konnte dieses Videoteil nicht fertigstellen.');
-    await sleep(5000);
-  }
-  const d = await fetch(`${API}/files/${id}:download?alt=media`, { headers: h });
-  if (!d.ok) throw new Error('Download des Teils fehlgeschlagen (HTTP ' + d.status + ').');
-  const b = await d.blob();
-  return b.type.startsWith('video') ? b : new Blob([b], { type: 'video/mp4' });
-}
-
-const dur = b => new Promise(res => {
-  const v = document.createElement('video');
-  v.preload = 'metadata';
-  v.onloadedmetadata = () => { const d = v.duration; URL.revokeObjectURL(v.src); res(isFinite(d) ? d : 0); };
-  v.onerror = () => res(0);
-  v.src = URL.createObjectURL(b);
-});
-
-async function stitch(blobs) {
-  const types = ['video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm'];
-  const mt = window.MediaRecorder && types.find(t => MediaRecorder.isTypeSupported(t));
-  if (!mt) throw new Error('Dieser Browser kann Teile nicht zusammenfügen.');
-  const v = document.createElement('video');
-  v.muted = true; v.playsInline = true;
-  v.src = URL.createObjectURL(blobs[0]);
-  await new Promise((r, j) => { v.onloadedmetadata = r; v.onerror = j; });
-  const c = document.createElement('canvas'), x = c.getContext('2d');
-  c.width = v.videoWidth; c.height = v.videoHeight;
-  const rec = new MediaRecorder(c.captureStream(30), { mimeType: mt, videoBitsPerSecond: 8e6 });
-  const chunks = [];
-  rec.ondataavailable = e => e.data.size && chunks.push(e.data);
-  const stopped = new Promise(r => rec.onstop = r);
-  rec.start(1000);
-  let raf;
-  const draw = () => { x.drawImage(v, 0, 0, c.width, c.height); raf = requestAnimationFrame(draw); };
-  draw();
-  for (let k = 0; k < blobs.length; k++) {
-    log(`Teile werden zusammengefügt (${k + 1} von ${blobs.length}). Tab geöffnet lassen.`, 92 + 8 * k / blobs.length);
-    if (k) v.src = URL.createObjectURL(blobs[k]);
-    await new Promise((res, rej) => { v.onended = res; v.onerror = () => rej(new Error('Ein Teil ließ sich nicht abspielen.')); v.play().catch(rej); });
-  }
-  cancelAnimationFrame(raf);
-  rec.stop();
-  await stopped;
-  return new Blob(chunks, { type: mt.split(';')[0] });
-}
-
-function show(final, clips) {
-  const main = final || clips[0];
-  const url = URL.createObjectURL(main);
-  $('player').src = url;
-  $('dl').href = url;
-  $('dl').download = 'animation.' + (main.type.includes('mp4') ? 'mp4' : 'webm');
-  $('dl').textContent = final || clips.length === 1 ? 'Video herunterladen' : 'Teil 1 herunterladen';
-  $('parts').innerHTML = '';
-  if (clips.length > 1) {
-    $('parts').append('Einzelne Teile: ');
-    clips.forEach((b, i) => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = `teil-${i + 1}.${b.type.includes('webm') ? 'webm' : 'mp4'}`;
-      a.textContent = 'Teil ' + (i + 1);
-      $('parts').append(a);
+async function callModel(key, models, system, prompt) {
+  let last;
+  for (const model of models) {
+    const r = await fetch(`${API}/models/${model}:generateContent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: system }] },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 32000 }
+      })
     });
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 404) { last = new Error('Modell „' + model + '“ nicht gefunden.'); continue; }
+    if (!r.ok) throw new Error((j.error && j.error.message) || 'HTTP ' + r.status);
+    const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+    const t = parts.filter(p => p.text && !p.thought).map(p => p.text).join('')
+      .replace(/^\s*```(?:javascript|js)?\s*/i, '').replace(/```\s*$/, '').trim();
+    if (!t) throw new Error('Gemini hat keinen Code geliefert (evtl. blockiert). Formuliere die Geschichte anders.');
+    return t;
   }
-  $('out').hidden = false;
+  throw last;
+}
+
+function frameDoc(code, mode, W, H, D) {
+  const safe = code.replace(/<\/script/gi, '<\\/script');
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'unsafe-inline'">
+<style>html,body{margin:0;height:100%;background:#000}canvas{width:100%;height:100%;display:block}</style></head><body>
+<script>window.onerror=function(m,s,l){parent.postMessage({err:m+' (Zeile '+l+')'},'*')};<\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+<script>${safe}<\/script>
+<script>
+(function(){
+var MODE='${mode}',W=${W},H=${H},D=${D},send=function(m){parent.postMessage(m,'*')};
+try{
+  if(typeof THREE==='undefined')throw new Error('Three.js konnte nicht geladen werden (Internet nötig).');
+  if(typeof build!=='function')throw new Error('Funktion build fehlt.');
+  var canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;document.body.appendChild(canvas);
+  var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,preserveDrawingBuffer:true});
+  renderer.setPixelRatio(1);renderer.setSize(W,H,false);
+  var scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(50,W/H,0.1,1000);
+  var update=build(THREE,scene,camera,renderer,D);
+  if(typeof update!=='function')throw new Error('build gibt keine update-Funktion zurück.');
+  if(MODE==='test'){
+    for(var t=0;t<=D;t+=0.5){update(t);renderer.render(scene,camera);}
+    send({ok:1});return;
+  }
+  var types=['video/mp4;codecs=avc1','video/webm;codecs=vp9','video/webm'];
+  var mt=types.find(function(x){return MediaRecorder.isTypeSupported(x)});
+  var rec=new MediaRecorder(canvas.captureStream(30),{mimeType:mt,videoBitsPerSecond:10e6});
+  var chunks=[],failed=false;
+  rec.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};
+  rec.onstop=function(){if(!failed)send({done:new Blob(chunks,{type:mt.split(';')[0]})})};
+  rec.start(1000);
+  var t0=performance.now();
+  (function loop(){
+    var t=(performance.now()-t0)/1000;
+    try{update(Math.min(t,D));renderer.render(scene,camera);}
+    catch(e){failed=true;try{rec.stop()}catch(x){}send({err:String(e)});return}
+    send({p:Math.min(t/D,1)});
+    if(t<D)requestAnimationFrame(loop);else rec.stop();
+  })();
+}catch(e){send({err:String(e)})}
+})();
+<\/script></body></html>`;
+}
+
+function runFrame(code, mode, W, H, D, onP) {
+  return new Promise((res, rej) => {
+    const f = $('frame');
+    let wd;
+    const end = (fn, v) => { clearTimeout(wd); removeEventListener('message', h); fn(v); };
+    const kick = () => { clearTimeout(wd); wd = setTimeout(() => end(rej, 'Die Szene reagiert nicht mehr.'), 25000); };
+    const h = e => {
+      if (e.source !== f.contentWindow) return;
+      const m = e.data || {};
+      kick();
+      if (m.err) end(rej, new Error(m.err));
+      else if (m.ok) end(res, null);
+      else if (m.done) end(res, m.done);
+      else if (m.p != null) onP(m.p);
+    };
+    addEventListener('message', h);
+    kick();
+    f.hidden = false;
+    f.style.aspectRatio = W + '/' + H;
+    f.srcdoc = frameDoc(code, mode, W, H, D);
+  });
 }
 
 async function run() {
-  const key = $('key').value.trim(), story = $('story').value.trim().replace(/"/g, "'");
+  const key = $('key').value.trim(), story = $('story').value.trim();
   if (!key || !story) { log('Bitte Geschichte und API-Key eingeben.', null, true); return; }
   try { $('rem').checked ? localStorage.setItem('gemini_key', key) : localStorage.removeItem('gemini_key'); } catch (e) {}
-  $('go').disabled = true; $('out').hidden = true;
-  const n = Math.round(+$('len').value / 10), aspect = $('fmt').value, style = STYLES[$('sty').value];
-  let chain = [], done = [], prev = null;
-  const all = () => [...done, ...chain].map(c => c.b);
+  $('go').disabled = true; $('out').hidden = true; $('frame').hidden = true;
+  const D = +$('len').value, portrait = $('fmt').value === '9:16';
+  const W = portrait ? 720 : 1280, H = portrait ? 1280 : 720;
+  const models = [$('model').value.trim() || 'gemini-3.8-flash', 'gemini-3.6-flash'];
+  const sys = SYS($('sty').value);
+  const first = `Story (may be in German): ${JSON.stringify(story)}\nDURATION = ${D} seconds. Format: ${portrait ? 'portrait 9:16, frame subjects vertically' : 'landscape 16:9'}. Write the complete animation code.`;
   try {
-    for (let i = 1; i <= n; i++) {
-      const len = chain.reduce((a, c) => a + c.d, 0);
-      let usePrev = null, input;
-      if (i > 1 && prev && len < 32) { usePrev = prev; input = extPrompt(story, i, n, style); }
-      else { done.push(...chain); chain = []; input = newPrompt(story, i, n, style); }
-      log(`Teil ${i} von ${n} wird erzeugt. Das dauert meist 1–3 Minuten.`, (i - 1) / n * 90);
-      const j = await gen(key, input, usePrev, aspect);
-      prev = j.id || null;
-      const v = findVideo(j);
-      if (!v) throw new Error('Google hat kein Video zurückgegeben (evtl. von Sicherheitsfiltern blockiert). Formuliere die Geschichte anders.');
-      const b = await toBlob(v, key), d = (await dur(b)) || 10;
-      const sum = chain.reduce((a, c) => a + c.d, 0);
-      if (usePrev && d > sum + 1.5) chain = [{ b, d }]; else chain.push({ b, d });
+    let code = null, err = null;
+    for (let a = 1; a <= 3; a++) {
+      log(a === 1 ? 'Gemini schreibt das 3D-Skript. Das dauert ca. 1–2 Minuten.' : `Fehler im Skript, Gemini korrigiert (Versuch ${a} von 3).`, 8);
+      const prompt = a === 1 ? first : `${first}\n\nYour previous code failed with this error: ${err.message}\n\nPrevious code:\n${code}\n\nReturn the complete corrected code only.`;
+      code = await callModel(key, models, sys, prompt);
+      log('Testlauf der Szene …', 15);
+      try { await runFrame(code, 'test', W, H, D, () => {}); err = null; break; }
+      catch (e) { err = e; if (a === 3) throw new Error('Das Skript lief auch nach 3 Versuchen nicht: ' + e.message); }
     }
-    const clips = all();
-    let final = null;
-    if (clips.length === 1) final = clips[0];
-    else { try { final = await stitch(clips); } catch (e) { log('Zusammenfügen nicht möglich: ' + e.message + ' Die Teile kannst du einzeln laden.', 100, true); } }
-    if (final) log('Fertig.', 100);
-    show(final, clips);
+    log('Aufnahme läuft …', 20);
+    const blob = await runFrame(code, 'rec', W, H, D, p => log(`Aufnahme läuft: ${Math.round(p * D)} von ${D} Sekunden`, 20 + p * 80));
+    const url = URL.createObjectURL(blob);
+    $('frame').hidden = true;
+    $('player').src = url;
+    $('dl').href = url;
+    $('dl').download = 'film.' + (blob.type.includes('mp4') ? 'mp4' : 'webm');
+    $('out').hidden = false;
+    log('Fertig.', 100);
   } catch (e) {
-    log(`Abgebrochen bei Teil ${done.length + chain.length + 1} von ${n}: ${e.message}`, null, true);
-    if (all().length) show(null, all());
+    log('Fehler: ' + e.message, null, true);
   } finally {
     $('go').disabled = false;
   }
