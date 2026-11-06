@@ -2,79 +2,114 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Story zu 3D-Film (kostenlos)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Storyfilm</title>
 <style>
-:root{color-scheme:dark;--bg:#171a33;--card:#21264a;--line:#38407a;--tx:#ecebf7;--mut:#a2a6cf;--ac:#8b7cff;--warn:#ffb547}
+:root{color-scheme:light dark;--bg:#fff;--ink:#0a0a0a;--mut:#6b6b6b;--line:#e3e3e3;--soft:#f5f5f5}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0a0a;--ink:#fafafa;--mut:#9b9b9b;--line:#262626;--soft:#141414}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif;padding:max(18px,env(safe-area-inset-top)) 16px max(40px,env(safe-area-inset-bottom))}
-main{max-width:680px;margin:0 auto}
-h1{font-size:1.8rem;line-height:1.15;margin:.5em 0 .3em;letter-spacing:-.015em}
-.sub{color:var(--mut);margin:0 0 1.4em;max-width:60ch}
-label{display:block;font-weight:600;margin:1.1em 0 .35em;font-size:.95rem}
-textarea,input[type=password],input[type=text],select{width:100%;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) 18px 130px}
+main{max-width:720px;margin:0 auto}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--ink)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:.9rem}
+.logo i{width:26px;height:26px;border-radius:7px;background:var(--ink);display:grid;place-items:center}
+.logo i::after{content:"";border-left:9px solid var(--bg);border-top:6px solid transparent;border-bottom:6px solid transparent;margin-left:2px}
+.chips{display:flex;gap:6px}
+.chips span{border:1px solid var(--ink);border-radius:99px;padding:2px 10px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+@media(max-width:480px){.chips span:nth-child(3){display:none}}
+h1{font-size:clamp(2.3rem,8vw,3.6rem);line-height:1;letter-spacing:-.035em;font-weight:800;margin:1.1em 0 .35em}
+.sub{color:var(--mut);max-width:48ch;margin:0 0 2em;font-size:1.05rem}
+.card{border:1px solid var(--ink);border-radius:16px;padding:20px;margin-bottom:14px;background:var(--bg)}
+.step{display:flex;align-items:center;gap:10px;font-weight:700;margin-bottom:14px}
+.step b{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:.8rem}
+textarea,input[type=password]{width:100%;background:var(--soft);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:14px;font:inherit}
 textarea{min-height:150px;resize:vertical}
-:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-@media(max-width:520px){.row{grid-template-columns:1fr}}
-.chk{display:flex;align-items:center;gap:8px;font-weight:400;color:var(--mut);margin:.6em 0 0}
-.chk input{width:auto}
-details{margin-top:1em;color:var(--mut)}
-button,.btn{display:inline-block;background:var(--ac);color:#11132b;border:0;border-radius:10px;padding:14px 20px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
-button{width:100%;margin-top:1.4em}
-button:disabled{opacity:.5;cursor:wait}
-.hint{color:var(--mut);font-size:.88rem;margin:.7em 0 0}
-#prog{margin-top:1.6em}
-.track{height:6px;background:var(--card);border-radius:3px;overflow:hidden}
-#bar{height:100%;width:0;background:var(--ac);transition:width .5s}
-#status{margin:.6em 0 0;min-height:1.5em}
-#status.err{color:var(--warn)}
-#frame,#player{width:100%;border:0;border-radius:12px;background:#000;display:block;margin-top:1em}
-#out .btn{margin-top:1em;width:100%}
+textarea:focus,input[type=password]:focus{outline:2px solid var(--ink);outline-offset:1px;border-color:var(--ink)}
+.cap{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:0 0 6px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:600px){.opts{grid-template-columns:1fr}}
+.seg{display:flex;border:1px solid var(--ink);border-radius:10px;overflow:hidden}
+.seg label{flex:1;position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg span{display:block;text-align:center;padding:11px 4px;font-weight:600;font-size:.9rem;border-right:1px solid var(--line)}
+.seg label:last-child span{border-right:0}
+.seg input:checked+span{background:var(--ink);color:var(--bg)}
+.seg input:focus-visible+span{outline:2px solid var(--mut);outline-offset:-4px}
+.rem{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:.9rem;margin-top:12px}
+#go{width:100%;display:flex;justify-content:center;align-items:center;gap:10px;background:var(--ink);color:var(--bg);border:0;border-radius:14px;padding:18px;font:700 1.05rem inherit;font-family:inherit;cursor:pointer;margin-top:6px}
+#go:disabled{opacity:.4;cursor:wait}
+.note{color:var(--mut);font-size:.85rem;margin:12px 2px 0}
+#stage{background:#000;color:#fff;border-radius:16px;overflow:hidden;margin-top:22px;border:1px solid var(--ink)}
+.bar{display:flex;justify-content:space-between;padding:10px 14px;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:#aaa}
+#frame,#player{width:100%;display:block;border:0;background:#000}
+#dl{display:block;margin:12px;background:#fff;color:#000;text-align:center;text-decoration:none;font-weight:700;padding:14px;border-radius:10px}
+#dock{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--bg);color:var(--ink);border-top:1px solid var(--ink);padding:12px 18px calc(12px + env(safe-area-inset-bottom))}
+#dock .in{max-width:720px;margin:0 auto}
+#dock .top{display:flex;justify-content:space-between;gap:14px;font-size:.8rem;font-weight:600;margin-bottom:8px}
+#status{min-width:0}
+.track{height:8px;border:1px solid currentColor;border-radius:99px;overflow:hidden}
+#bar{height:100%;width:0;background:currentColor;transition:width .6s}
+#dock.err{background:var(--ink);color:var(--bg)}
 </style>
 </head>
 <body>
 <main>
-<h1>Aus einer Geschichte wird ein 3D-Film</h1>
-<p class="sub">Gemini schreibt aus deiner Geschichte ein 3D-Skript, dein Browser spielt es ab und nimmt es als stummes Video auf. Das läuft mit dem kostenlosen Google-Key.</p>
+<header>
+  <div class="logo"><i></i>Storyfilm</div>
+  <div class="chips"><span>3D</span><span>Stumm</span><span>Gratis</span></div>
+</header>
 
-<label for="story">Deine Geschichte</label>
-<textarea id="story" placeholder="Zum Beispiel: Ich laufe abends nach Hause. Ein Taxi hält neben mir. Ich gebe dem Taxifahrer einen PC. Er ist freundlich, steigt aus und …"></textarea>
+<h1>Deine Geschichte.<br>Als 3D-Film.</h1>
+<p class="sub">Beschreibe, was passieren soll. Gemini schreibt das 3D-Skript, dein Browser spielt es ab und nimmt es als Video auf.</p>
 
-<div class="row">
-  <div><label for="len">Länge</label>
-    <select id="len"><option value="30">30 Sekunden</option><option value="60" selected>60 Sekunden</option><option value="90">90 Sekunden</option></select></div>
-  <div><label for="fmt">Format</label>
-    <select id="fmt"><option value="16:9">Querformat</option><option value="9:16">Hochformat</option></select></div>
-  <div><label for="sty">Stil</label>
-    <select id="sty"><option value="pixar">Rund und bunt</option><option value="real">Natürlich</option><option value="poly">Low-Poly</option></select></div>
-</div>
+<section class="card">
+  <div class="step"><b>1</b>Geschichte</div>
+  <textarea id="story" placeholder="Ich laufe abends nach Hause. Ein Taxi hält neben mir. Ich gebe dem Taxifahrer einen PC. Er ist freundlich, steigt aus und …"></textarea>
+</section>
 
-<label for="key">Google API-Key</label>
-<input id="key" type="password" autocomplete="off" placeholder="AIza…">
-<label class="chk"><input type="checkbox" id="rem"> Key auf diesem Gerät merken</label>
-<details><summary>Erweitert</summary>
-  <label for="model">Textmodell</label>
-  <input id="model" type="text" value="gemini-3.8-flash">
-</details>
+<section class="card">
+  <div class="step"><b>2</b>Einstellungen</div>
+  <div class="opts">
+    <div><p class="cap mono">Länge</p>
+      <div class="seg"><label><input type="radio" name="len" value="30"><span>30 s</span></label><label><input type="radio" name="len" value="60" checked><span>60 s</span></label><label><input type="radio" name="len" value="90"><span>90 s</span></label></div></div>
+    <div><p class="cap mono">Format</p>
+      <div class="seg"><label><input type="radio" name="fmt" value="16:9" checked><span>Quer</span></label><label><input type="radio" name="fmt" value="9:16"><span>Hoch</span></label></div></div>
+    <div><p class="cap mono">Stil</p>
+      <div class="seg"><label><input type="radio" name="sty" value="pixar" checked><span>Rund</span></label><label><input type="radio" name="sty" value="real"><span>Natur</span></label><label><input type="radio" name="sty" value="poly"><span>Poly</span></label></div></div>
+  </div>
+</section>
 
-<button id="go">Film erstellen</button>
-<p class="hint">Die Aufnahme läuft in Echtzeit: 60 Sekunden Film brauchen 60 Sekunden. Tab und Bildschirm so lange geöffnet lassen. Die Figuren bestehen aus einfachen 3D-Formen.</p>
+<section class="card">
+  <div class="step"><b>3</b>Google API-Key</div>
+  <input id="key" type="password" autocomplete="off" placeholder="AIza…">
+  <label class="rem"><input type="checkbox" id="rem"> Auf diesem Gerät merken</label>
+</section>
 
-<div id="prog" hidden>
-  <div class="track"><div id="bar"></div></div>
-  <p id="status"></p>
-</div>
-<iframe id="frame" sandbox="allow-scripts" hidden title="Vorschau"></iframe>
-<div id="out" hidden>
-  <video id="player" controls playsinline></video>
-  <a id="dl" class="btn">Video herunterladen</a>
-</div>
+<button id="go">Film erstellen <span aria-hidden="true">→</span></button>
+<p class="note">Die Aufnahme läuft in Echtzeit. Tab und Bildschirm bis zum Ende geöffnet lassen. Ist ein Gemini-Modell ausgelastet, wechselt die Seite automatisch zum nächsten.</p>
+
+<section id="stage" hidden>
+  <div class="bar mono"><span>Vorschau</span><span id="tag">Live</span></div>
+  <iframe id="frame" sandbox="allow-scripts" title="Vorschau"></iframe>
+  <video id="player" controls playsinline hidden></video>
+  <a id="dl" hidden>Video herunterladen</a>
+</section>
 </main>
+
+<div id="dock"><div class="in">
+  <div class="top mono"><span id="status">Bereit</span><span id="pct">0 %</span></div>
+  <div class="track"><div id="bar"></div></div>
+</div></div>
 
 <script>
 const $ = id => document.getElementById(id);
+const pick = n => document.querySelector(`input[name=${n}]:checked`).value;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 const API = 'https://generativelanguage.googleapis.com/v1beta';
+const MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
+let active = 0, cur = 0, timer;
 const STYLES = {
   pixar: 'Rounded, friendly, saturated colors, big expressive heads, soft shading.',
   real: 'Natural proportions, muted realistic colors, believable lighting.',
@@ -83,11 +118,12 @@ const STYLES = {
 
 try { const k = localStorage.getItem('gemini_key'); if (k) { $('key').value = k; $('rem').checked = true; } } catch (e) {}
 
+function setPct(p) { cur = p; $('bar').style.width = p + '%'; $('pct').textContent = Math.round(p) + ' %'; }
+function creep(to) { clearInterval(timer); timer = setInterval(() => setPct(cur + (to - cur) * 0.04), 800); }
 function log(msg, pct, err) {
-  $('prog').hidden = false;
   $('status').textContent = msg;
-  $('status').className = err ? 'err' : '';
-  if (pct != null) $('bar').style.width = pct + '%';
+  $('dock').classList.toggle('err', !!err);
+  if (pct != null) setPct(pct);
 }
 
 const SYS = style => `You are an expert 3D animator who writes Three.js code (r128, global THREE, no imports). Output ONLY JavaScript code, no markdown fences, no explanations.
@@ -99,28 +135,42 @@ Define exactly one entry point: function build(THREE, scene, camera, renderer, D
 - Keep it under 1500 meshes. Use small helper functions to keep the code short. Style: ${STYLES[style]}
 - The code must run without errors on the first try.`;
 
-async function callModel(key, models, system, prompt) {
+const overloaded = (s, m) => [404, 429, 500, 502, 503, 504].includes(s) || /overload|unavailable|high demand|quota|exhaust|rate limit/i.test(m || '');
+
+async function callModel(key, system, prompt) {
   let last;
-  for (const model of models) {
-    const r = await fetch(`${API}/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.8, maxOutputTokens: 32000 }
-      })
-    });
-    const j = await r.json().catch(() => ({}));
-    if (r.status === 404) { last = new Error('Modell „' + model + '“ nicht gefunden.'); continue; }
-    if (!r.ok) throw new Error((j.error && j.error.message) || 'HTTP ' + r.status);
-    const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-    const t = parts.filter(p => p.text && !p.thought).map(p => p.text).join('')
-      .replace(/^\s*```(?:javascript|js)?\s*/i, '').replace(/```\s*$/, '').trim();
-    if (!t) throw new Error('Gemini hat keinen Code geliefert (evtl. blockiert). Formuliere die Geschichte anders.');
-    return t;
+  for (let round = 0; round < 2; round++) {
+    for (let k = 0; k < MODELS.length; k++) {
+      const idx = (active + k) % MODELS.length, model = MODELS[idx];
+      const r = await fetch(`${API}/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: system }] },
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.8, maxOutputTokens: 32000 }
+        })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        const m = (j.error && j.error.message) || 'HTTP ' + r.status;
+        if (overloaded(r.status, m)) {
+          last = new Error(m);
+          log(`${model} ist gerade ausgelastet. Wechsle zu ${MODELS[(idx + 1) % MODELS.length]} und starte sofort neu.`);
+          continue;
+        }
+        throw new Error(m);
+      }
+      const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+      const t = parts.filter(p => p.text && !p.thought).map(p => p.text).join('')
+        .replace(/^\s*```(?:javascript|js)?\s*/i, '').replace(/```\s*$/, '').trim();
+      if (!t) throw new Error('Gemini hat keinen Code geliefert (evtl. blockiert). Formuliere die Geschichte anders.');
+      active = idx;
+      return t;
+    }
+    if (round === 0) { log('Alle Modelle sind gerade ausgelastet. Neuer Versuch in 10 Sekunden.'); await sleep(10000); }
   }
-  throw last;
+  throw last || new Error('Kein Modell erreichbar.');
 }
 
 function frameDoc(code, mode, W, H, D) {
@@ -172,7 +222,7 @@ function runFrame(code, mode, W, H, D, onP) {
     const f = $('frame');
     let wd;
     const end = (fn, v) => { clearTimeout(wd); removeEventListener('message', h); fn(v); };
-    const kick = () => { clearTimeout(wd); wd = setTimeout(() => end(rej, 'Die Szene reagiert nicht mehr.'), 25000); };
+    const kick = () => { clearTimeout(wd); wd = setTimeout(() => end(rej, new Error('Die Szene reagiert nicht mehr.')), 25000); };
     const h = e => {
       if (e.source !== f.contentWindow) return;
       const m = e.data || {};
@@ -184,7 +234,7 @@ function runFrame(code, mode, W, H, D, onP) {
     };
     addEventListener('message', h);
     kick();
-    f.hidden = false;
+    $('stage').hidden = false;
     f.style.aspectRatio = W + '/' + H;
     f.srcdoc = frameDoc(code, mode, W, H, D);
   });
@@ -194,32 +244,35 @@ async function run() {
   const key = $('key').value.trim(), story = $('story').value.trim();
   if (!key || !story) { log('Bitte Geschichte und API-Key eingeben.', null, true); return; }
   try { $('rem').checked ? localStorage.setItem('gemini_key', key) : localStorage.removeItem('gemini_key'); } catch (e) {}
-  $('go').disabled = true; $('out').hidden = true; $('frame').hidden = true;
-  const D = +$('len').value, portrait = $('fmt').value === '9:16';
+  $('go').disabled = true;
+  $('stage').hidden = true; $('frame').hidden = false; $('player').hidden = true; $('dl').hidden = true; $('tag').textContent = 'Live';
+  const D = +pick('len'), portrait = pick('fmt') === '9:16';
   const W = portrait ? 720 : 1280, H = portrait ? 1280 : 720;
-  const models = [$('model').value.trim() || 'gemini-3.8-flash', 'gemini-3.6-flash'];
-  const sys = SYS($('sty').value);
+  const sys = SYS(pick('sty'));
   const first = `Story (may be in German): ${JSON.stringify(story)}\nDURATION = ${D} seconds. Format: ${portrait ? 'portrait 9:16, frame subjects vertically' : 'landscape 16:9'}. Write the complete animation code.`;
   try {
     let code = null, err = null;
+    setPct(2);
     for (let a = 1; a <= 3; a++) {
-      log(a === 1 ? 'Gemini schreibt das 3D-Skript. Das dauert ca. 1–2 Minuten.' : `Fehler im Skript, Gemini korrigiert (Versuch ${a} von 3).`, 8);
+      log(a === 1 ? 'Gemini schreibt das 3D-Skript (ca. 1–2 Minuten)' : `Fehler im Skript, Gemini korrigiert (Versuch ${a} von 3)`);
+      creep(24);
       const prompt = a === 1 ? first : `${first}\n\nYour previous code failed with this error: ${err.message}\n\nPrevious code:\n${code}\n\nReturn the complete corrected code only.`;
-      code = await callModel(key, models, sys, prompt);
-      log('Testlauf der Szene …', 15);
+      code = await callModel(key, sys, prompt);
+      clearInterval(timer);
+      log('Testlauf der Szene', 26);
       try { await runFrame(code, 'test', W, H, D, () => {}); err = null; break; }
       catch (e) { err = e; if (a === 3) throw new Error('Das Skript lief auch nach 3 Versuchen nicht: ' + e.message); }
     }
-    log('Aufnahme läuft …', 20);
-    const blob = await runFrame(code, 'rec', W, H, D, p => log(`Aufnahme läuft: ${Math.round(p * D)} von ${D} Sekunden`, 20 + p * 80));
+    log('Aufnahme läuft', 30);
+    const blob = await runFrame(code, 'rec', W, H, D, p => log(`Aufnahme: ${Math.round(p * D)} von ${D} Sekunden`, 30 + p * 70));
     const url = URL.createObjectURL(blob);
     $('frame').hidden = true;
-    $('player').src = url;
-    $('dl').href = url;
-    $('dl').download = 'film.' + (blob.type.includes('mp4') ? 'mp4' : 'webm');
-    $('out').hidden = false;
-    log('Fertig.', 100);
+    $('player').src = url; $('player').hidden = false;
+    $('dl').href = url; $('dl').download = 'film.' + (blob.type.includes('mp4') ? 'mp4' : 'webm'); $('dl').hidden = false;
+    $('tag').textContent = 'Fertig';
+    log('Fertig. Dein Film ist bereit.', 100);
   } catch (e) {
+    clearInterval(timer);
     log('Fehler: ' + e.message, null, true);
   } finally {
     $('go').disabled = false;
