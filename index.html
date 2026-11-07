@@ -9,7 +9,7 @@
 @media(prefers-color-scheme:dark){:root{--bg:#0a0a0a;--ink:#fafafa;--mut:#9b9b9b;--line:#262626;--soft:#141414}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) 18px 130px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top) 18px 140px}
 main{max-width:720px;margin:0 auto}
 .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
 header{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--ink)}
@@ -45,13 +45,29 @@ textarea:focus,input[type=password]:focus{outline:2px solid var(--ink);outline-o
 .bar{display:flex;justify-content:space-between;padding:10px 14px;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:#aaa}
 #frame,#player{width:100%;display:block;border:0;background:#000}
 #dl{display:block;margin:12px;background:#fff;color:#000;text-align:center;text-decoration:none;font-weight:700;padding:14px;border-radius:10px}
-#dock{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--bg);color:var(--ink);border-top:1px solid var(--ink);padding:12px 18px calc(12px + env(safe-area-inset-bottom))}
+#dock{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);color:var(--ink);border-top:1px solid var(--ink);padding:12px 18px calc(12px + env(safe-area-inset-bottom))}
 #dock .in{max-width:720px;margin:0 auto}
-#dock .top{display:flex;justify-content:space-between;gap:14px;font-size:.8rem;font-weight:600;margin-bottom:8px}
-#status{min-width:0}
-.track{height:8px;border:1px solid currentColor;border-radius:99px;overflow:hidden}
+#status{font-size:.8rem;font-weight:600;margin-bottom:9px;min-height:1.2em}
+.line{display:flex;align-items:center;gap:12px}
+.track{flex:1;height:8px;border:1px solid currentColor;border-radius:99px;overflow:hidden}
 #bar{height:100%;width:0;background:currentColor;transition:width .6s}
+#pct{font-size:.8rem;font-weight:600;min-width:3.2em;text-align:right}
+.pill{background:transparent;color:inherit;border:1px solid currentColor;border-radius:99px;padding:6px 14px;font:600 .8rem inherit;font-family:inherit;cursor:pointer}
+.pill:disabled{opacity:.4}
 #dock.err{background:var(--ink);color:var(--bg)}
+#games{position:fixed;inset:0;z-index:10;background:var(--bg);padding:max(16px,env(safe-area-inset-top)) 18px 130px;overflow:auto}
+.gh{display:flex;justify-content:space-between;align-items:center;max-width:420px;margin:0 auto 14px}
+.gh b{font-size:1.3rem;letter-spacing:-.02em}
+#gtabs{max-width:420px;margin:0 auto}
+#gbox{max-width:420px;margin:16px auto 0;text-align:center}
+.gtxt{color:var(--mut);font-size:.9rem;margin:6px 0}
+#gbox canvas{width:100%;max-width:360px;border:1px solid var(--ink);border-radius:12px;touch-action:none;display:block;margin:8px auto}
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.mc{aspect-ratio:1;border:1px solid var(--ink);border-radius:12px;background:var(--bg);color:var(--ink);font-size:1.8rem;cursor:pointer}
+.mc.on{background:var(--ink);color:var(--bg)}
+.mc.done{opacity:.25}
+.tap{position:relative;height:340px;border:1px solid var(--ink);border-radius:14px;overflow:hidden;touch-action:manipulation}
+.dot{position:absolute;width:64px;height:64px;border-radius:50%;background:var(--ink);border:0;cursor:pointer}
 </style>
 </head>
 <body>
@@ -88,7 +104,7 @@ textarea:focus,input[type=password]:focus{outline:2px solid var(--ink);outline-o
 </section>
 
 <button id="go">Film erstellen <span aria-hidden="true">→</span></button>
-<p class="note">Die Aufnahme läuft in Echtzeit. Tab und Bildschirm bis zum Ende geöffnet lassen. Ist ein Gemini-Modell ausgelastet, wechselt die Seite automatisch zum nächsten.</p>
+<p class="note">Ist ein Gemini-Modell ausgelastet oder macht ein Fehler, wechselt die Seite automatisch und versucht es sofort nochmal. Zum Warten gibt es Minispiele. Die Aufnahme am Ende läuft in Echtzeit, Tab und Bildschirm dann geöffnet lassen.</p>
 
 <section id="stage" hidden>
   <div class="bar mono"><span>Vorschau</span><span id="tag">Live</span></div>
@@ -98,9 +114,24 @@ textarea:focus,input[type=password]:focus{outline:2px solid var(--ink);outline-o
 </section>
 </main>
 
+<div id="games" hidden>
+  <div class="gh"><b>Minispiele</b><button id="gclose" class="pill">Schließen ✕</button></div>
+  <div id="gtabs" class="seg">
+    <label><input type="radio" name="game" value="snake" checked><span>Snake</span></label>
+    <label><input type="radio" name="game" value="memory"><span>Memory</span></label>
+    <label><input type="radio" name="game" value="tap"><span>Tippen</span></label>
+  </div>
+  <div id="gbox"></div>
+  <p class="gtxt" style="text-align:center;margin-top:18px">Dein Film wird im Hintergrund weiter erstellt.</p>
+</div>
+
 <div id="dock"><div class="in">
-  <div class="top mono"><span id="status">Bereit</span><span id="pct">0 %</span></div>
-  <div class="track"><div id="bar"></div></div>
+  <div id="status" class="mono">Bereit</div>
+  <div class="line">
+    <div class="track"><div id="bar"></div></div>
+    <span id="pct" class="mono">0 %</span>
+    <button id="gbtn" class="pill" hidden>Spiele</button>
+  </div>
 </div></div>
 
 <script>
@@ -135,42 +166,50 @@ Define exactly one entry point: function build(THREE, scene, camera, renderer, D
 - Keep it under 1500 meshes. Use small helper functions to keep the code short. Style: ${STYLES[style]}
 - The code must run without errors on the first try.`;
 
-const overloaded = (s, m) => [404, 429, 500, 502, 503, 504].includes(s) || /overload|unavailable|high demand|quota|exhaust|rate limit/i.test(m || '');
+const FATAL = /api key not valid|api_key_invalid|api key expired|invalid api key|permission denied/i;
 
 async function callModel(key, system, prompt) {
-  let last;
-  for (let round = 0; round < 2; round++) {
+  let lastMsg = '';
+  for (let round = 0; round < 8; round++) {
     for (let k = 0; k < MODELS.length; k++) {
-      const idx = (active + k) % MODELS.length, model = MODELS[idx];
-      const r = await fetch(`${API}/models/${model}:generateContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: system }] },
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.8, maxOutputTokens: 32000 }
-        })
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) {
-        const m = (j.error && j.error.message) || 'HTTP ' + r.status;
-        if (overloaded(r.status, m)) {
-          last = new Error(m);
-          log(`${model} ist gerade ausgelastet. Wechsle zu ${MODELS[(idx + 1) % MODELS.length]} und starte sofort neu.`);
-          continue;
+      const idx = (active + k) % MODELS.length, model = MODELS[idx], next = MODELS[(idx + 1) % MODELS.length];
+      let text = null, msg = '';
+      const ac = new AbortController(), to = setTimeout(() => ac.abort(), 240000);
+      try {
+        const r = await fetch(`${API}/models/${model}:generateContent`, {
+          method: 'POST', signal: ac.signal,
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: system }] },
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.8, maxOutputTokens: 32000 }
+          })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          msg = (j.error && j.error.message) || 'HTTP ' + r.status;
+          if (r.status === 401 || r.status === 403 || FATAL.test(msg)) throw Object.assign(new Error('Der API-Key wird nicht akzeptiert. Bitte prüfe ihn. (' + msg + ')'), { fatal: true });
+        } else {
+          const c = j.candidates && j.candidates[0];
+          if ((j.promptFeedback && j.promptFeedback.blockReason) || (c && c.finishReason === 'SAFETY'))
+            throw Object.assign(new Error('Gemini hat die Geschichte blockiert. Formuliere sie bitte anders.'), { fatal: true });
+          const parts = (c && c.content && c.content.parts) || [];
+          const t = parts.filter(p => p.text && !p.thought).map(p => p.text).join('')
+            .replace(/^\s*```(?:javascript|js)?\s*/i, '').replace(/```\s*$/, '').trim();
+          if (!t) msg = 'Leere Antwort';
+          else if (c.finishReason === 'MAX_TOKENS') msg = 'Antwort abgeschnitten';
+          else text = t;
         }
-        throw new Error(m);
-      }
-      const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-      const t = parts.filter(p => p.text && !p.thought).map(p => p.text).join('')
-        .replace(/^\s*```(?:javascript|js)?\s*/i, '').replace(/```\s*$/, '').trim();
-      if (!t) throw new Error('Gemini hat keinen Code geliefert (evtl. blockiert). Formuliere die Geschichte anders.');
-      active = idx;
-      return t;
+      } catch (e) { if (e.fatal) throw e; msg = e.name === 'AbortError' ? 'Zeitüberschreitung' : (e.message || 'Netzwerkfehler'); }
+      clearTimeout(to);
+      if (text) { active = idx; return text; }
+      lastMsg = msg;
+      log(`${model} ist gerade nicht verfügbar. Wechsle zu ${next} und versuche es sofort nochmal.`);
+      await sleep(600);
     }
-    if (round === 0) { log('Alle Modelle sind gerade ausgelastet. Neuer Versuch in 10 Sekunden.'); await sleep(10000); }
+    for (let s = 15; s > 0; s--) { log(`Alle Modelle sind gerade ausgelastet. Neuer Versuch in ${s} s.`); await sleep(1000); }
   }
-  throw last || new Error('Kein Modell erreichbar.');
+  throw new Error('Gemini ist gerade dauerhaft überlastet. Bitte versuche es in ein paar Minuten nochmal. (' + lastMsg + ')');
 }
 
 function frameDoc(code, mode, W, H, D) {
@@ -194,8 +233,15 @@ try{
   var update=build(THREE,scene,camera,renderer,D);
   if(typeof update!=='function')throw new Error('build gibt keine update-Funktion zurück.');
   if(MODE==='test'){
-    for(var t=0;t<=D;t+=0.5){update(t);renderer.render(scene,camera);}
-    send({ok:1});return;
+    var tt=0;
+    (function step(){
+      try{
+        for(var i=0;i<4&&tt<=D;i++,tt+=1){update(tt);renderer.render(scene,camera);}
+        send({tick:1});
+        if(tt<=D)setTimeout(step,0);else send({ok:1});
+      }catch(e){send({err:String(e)})}
+    })();
+    return;
   }
   var types=['video/mp4;codecs=avc1','video/webm;codecs=vp9','video/webm'];
   var mt=types.find(function(x){return MediaRecorder.isTypeSupported(x)});
@@ -222,7 +268,7 @@ function runFrame(code, mode, W, H, D, onP) {
     const f = $('frame');
     let wd;
     const end = (fn, v) => { clearTimeout(wd); removeEventListener('message', h); fn(v); };
-    const kick = () => { clearTimeout(wd); wd = setTimeout(() => end(rej, new Error('Die Szene reagiert nicht mehr.')), 25000); };
+    const kick = () => { clearTimeout(wd); wd = setTimeout(() => end(rej, new Error('Die Szene reagiert nicht mehr.')), 45000); };
     const h = e => {
       if (e.source !== f.contentWindow) return;
       const m = e.data || {};
@@ -240,31 +286,141 @@ function runFrame(code, mode, W, H, D, onP) {
   });
 }
 
+/* ---------- Minispiele ---------- */
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v);
+
+function snake(box) {
+  box.innerHTML = '<p class="gtxt" id="ss"></p><canvas width="300" height="300"></canvas><p class="gtxt">Wische oder nutze die Pfeiltasten</p>';
+  const c = box.querySelector('canvas'), x = c.getContext('2d'), ss = box.querySelector('#ss'), N = 15, S = 20;
+  let s, d, nd, f, sc, iv, sx, sy, best = snake.best || 0;
+  const food = () => { do f = { x: Math.random() * N | 0, y: Math.random() * N | 0 }; while (s.some(p => p.x == f.x && p.y == f.y)); };
+  const reset = () => { s = [{ x: 7, y: 7 }]; d = nd = { x: 1, y: 0 }; sc = 0; food(); };
+  const draw = () => {
+    x.fillStyle = css('--bg'); x.fillRect(0, 0, 300, 300);
+    x.fillStyle = css('--ink'); s.forEach(p => x.fillRect(p.x * S + 1, p.y * S + 1, S - 2, S - 2));
+    x.beginPath(); x.arc(f.x * S + 10, f.y * S + 10, 6, 0, 7); x.fill();
+    ss.textContent = `Punkte: ${sc} · Rekord: ${best}`;
+  };
+  const tick = () => {
+    d = nd;
+    const h = { x: s[0].x + d.x, y: s[0].y + d.y };
+    if (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N || s.some(p => p.x == h.x && p.y == h.y)) { best = snake.best = Math.max(best, sc); reset(); }
+    else { s.unshift(h); if (h.x == f.x && h.y == f.y) { sc++; food(); } else s.pop(); }
+    draw();
+  };
+  const dir = (a, b) => { if (a !== -d.x || b !== -d.y) nd = { x: a, y: b }; };
+  const key = e => { const m = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (m) { dir(...m); e.preventDefault(); } };
+  addEventListener('keydown', key);
+  c.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  c.addEventListener('touchend', e => {
+    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+    Math.abs(dx) > Math.abs(dy) ? dir(Math.sign(dx), 0) : dir(0, Math.sign(dy));
+  });
+  reset(); draw(); iv = setInterval(tick, 140);
+  return () => { clearInterval(iv); removeEventListener('keydown', key); };
+}
+
+function memory(box) {
+  const g = ['●', '■', '▲', '◆', '★', '♥', '☾', '✚'];
+  let cards, shown, done, moves, lock, t;
+  const start = () => { cards = [...g, ...g].sort(() => Math.random() - 0.5); shown = []; done = []; moves = 0; lock = false; draw(); };
+  const draw = () => {
+    const win = done.length == 16;
+    box.innerHTML = `<p class="gtxt">Züge: ${moves}${win ? ' · Geschafft!' : ''}</p><div class="mem">` +
+      cards.map((c, i) => { const o = shown.includes(i), dn = done.includes(i); return `<button class="mc ${o ? 'on' : ''} ${dn ? 'done' : ''}" data-i="${i}">${o || dn ? c : ''}</button>`; }).join('') +
+      '</div>' + (win ? '<p><button class="pill" id="again">Nochmal</button></p>' : '');
+    box.querySelectorAll('.mc').forEach(b => b.onclick = () => flip(+b.dataset.i));
+    const a = box.querySelector('#again'); if (a) a.onclick = start;
+  };
+  const flip = i => {
+    if (lock || shown.includes(i) || done.includes(i)) return;
+    shown.push(i);
+    if (shown.length == 2) {
+      moves++; lock = true;
+      if (cards[shown[0]] == cards[shown[1]]) { done.push(...shown); shown = []; lock = false; }
+      else t = setTimeout(() => { shown = []; lock = false; draw(); }, 800);
+    }
+    draw();
+  };
+  start();
+  return () => clearTimeout(t);
+}
+
+function tap(box) {
+  let sc = 0, left = 20, iv, best = tap.best || 0;
+  box.innerHTML = '<p class="gtxt" id="ts"></p><div class="tap" id="ta"></div>';
+  const ta = box.querySelector('#ta'), ts = box.querySelector('#ts');
+  const info = () => { ts.textContent = `Punkte: ${sc} · Zeit: ${left} s · Rekord: ${best}`; };
+  const dot = () => {
+    ta.innerHTML = '';
+    const d = document.createElement('button'); d.className = 'dot';
+    d.style.left = Math.random() * (ta.clientWidth - 64) + 'px';
+    d.style.top = Math.random() * (ta.clientHeight - 64) + 'px';
+    d.onpointerdown = () => { sc++; info(); dot(); };
+    ta.append(d);
+  };
+  const start = () => {
+    sc = 0; left = 20; info(); dot();
+    iv = setInterval(() => {
+      left--; info();
+      if (left <= 0) {
+        clearInterval(iv);
+        best = tap.best = Math.max(best, sc);
+        ta.innerHTML = `<div style="padding-top:120px"><b style="font-size:1.6rem">${sc} Punkte</b><br><br></div>`;
+        const b = document.createElement('button'); b.className = 'pill'; b.textContent = 'Nochmal'; b.onclick = start;
+        ta.firstChild.append(b); info();
+      }
+    }, 1000);
+  };
+  start();
+  return () => clearInterval(iv);
+}
+
+const GAMES = { snake, memory, tap };
+let stopGame = null;
+function startGame() { if (stopGame) stopGame(); $('gbox').innerHTML = ''; stopGame = GAMES[pick('game')]($('gbox')); }
+function openGames() { $('games').hidden = false; startGame(); }
+function closeGames() { if (stopGame) stopGame(); stopGame = null; $('games').hidden = true; }
+$('gbtn').addEventListener('click', openGames);
+$('gclose').addEventListener('click', closeGames);
+document.querySelectorAll('input[name=game]').forEach(r => r.addEventListener('change', startGame));
+addEventListener('keydown', e => { if (e.key === 'Escape') closeGames(); });
+
+/* ---------- Ablauf ---------- */
 async function run() {
   const key = $('key').value.trim(), story = $('story').value.trim();
   if (!key || !story) { log('Bitte Geschichte und API-Key eingeben.', null, true); return; }
   try { $('rem').checked ? localStorage.setItem('gemini_key', key) : localStorage.removeItem('gemini_key'); } catch (e) {}
   $('go').disabled = true;
   $('stage').hidden = true; $('frame').hidden = false; $('player').hidden = true; $('dl').hidden = true; $('tag').textContent = 'Live';
+  $('gbtn').hidden = false; $('gbtn').disabled = false;
   const D = +pick('len'), portrait = pick('fmt') === '9:16';
   const W = portrait ? 720 : 1280, H = portrait ? 1280 : 720;
   const sys = SYS(pick('sty'));
   const first = `Story (may be in German): ${JSON.stringify(story)}\nDURATION = ${D} seconds. Format: ${portrait ? 'portrait 9:16, frame subjects vertically' : 'landscape 16:9'}. Write the complete animation code.`;
   try {
-    let code = null, err = null;
+    let code = null, err = null, ok = false;
     setPct(2);
-    for (let a = 1; a <= 3; a++) {
-      log(a === 1 ? 'Gemini schreibt das 3D-Skript (ca. 1–2 Minuten)' : `Fehler im Skript, Gemini korrigiert (Versuch ${a} von 3)`);
+    for (let a = 1; a <= 6 && !ok; a++) {
+      const fix = a !== 1 && a !== 4 && code && err;
+      log(a === 1 ? 'Gemini schreibt das 3D-Skript (ca. 1–2 Minuten)' : fix ? `Gemini korrigiert das Skript (Versuch ${a} von 6)` : `Skript wird neu geschrieben (Versuch ${a} von 6)`);
       creep(24);
-      const prompt = a === 1 ? first : `${first}\n\nYour previous code failed with this error: ${err.message}\n\nPrevious code:\n${code}\n\nReturn the complete corrected code only.`;
+      const prompt = fix ? `${first}\n\nYour previous code failed with this error: ${err.message}\n\nPrevious code:\n${code}\n\nReturn the complete corrected code only.` : first;
       code = await callModel(key, sys, prompt);
       clearInterval(timer);
       log('Testlauf der Szene', 26);
-      try { await runFrame(code, 'test', W, H, D, () => {}); err = null; break; }
-      catch (e) { err = e; if (a === 3) throw new Error('Das Skript lief auch nach 3 Versuchen nicht: ' + e.message); }
+      try { await runFrame(code, 'test', W, H, D, () => {}); ok = true; }
+      catch (e) { err = e; }
     }
-    log('Aufnahme läuft', 30);
-    const blob = await runFrame(code, 'rec', W, H, D, p => log(`Aufnahme: ${Math.round(p * D)} von ${D} Sekunden`, 30 + p * 70));
+    if (!ok) throw new Error('Das Skript lief auch nach 6 Versuchen nicht: ' + err.message);
+    closeGames(); $('gbtn').disabled = true;
+    let blob = null;
+    for (let r = 0; r < 3 && !blob; r++) {
+      log(r ? 'Aufnahme wird neu gestartet' : 'Aufnahme läuft', 30);
+      try { blob = await runFrame(code, 'rec', W, H, D, p => log(`Aufnahme: ${Math.round(p * D)} von ${D} s · Spiele pausiert`, 30 + p * 70)); }
+      catch (e) { if (r === 2) throw e; }
+    }
     const url = URL.createObjectURL(blob);
     $('frame').hidden = true;
     $('player').src = url; $('player').hidden = false;
@@ -275,7 +431,7 @@ async function run() {
     clearInterval(timer);
     log('Fehler: ' + e.message, null, true);
   } finally {
-    $('go').disabled = false;
+    $('go').disabled = false; $('gbtn').hidden = true; closeGames();
   }
 }
 $('go').addEventListener('click', run);
